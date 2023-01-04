@@ -21,6 +21,10 @@ namespace chatbots {
         double health() const { return health_; }
         double mana() const { return mana_; }
         double stamina() const { return stamina_; }
+
+        void set_health(double health) { health_ = health; }
+        void set_mana(double mana) { mana_ = mana; }
+        void set_stamina(double stamina) { stamina_ = stamina; }
     };
 
     // #4 Class with getters and setters
@@ -72,7 +76,37 @@ namespace chatbots {
         void set_stats(const std::vector<StatSchema>& statistics)
         {
             stats_ = statistics;
-            // set qproperty member variables from stats_
+        }
+
+        bool set_health(double health)
+        {
+            bool ret = false;
+            if (stats_.size() > 0)
+            {
+                ret = true;
+                stats_.at(0).set_health(health);
+            }
+            return ret;
+        }
+        bool set_mana(double mana)
+        {
+            bool ret = false;
+            if (stats_.size() > 0)
+            {
+                ret = true;
+                stats_.at(0).set_mana(mana);
+            }
+            return ret;
+        }
+        bool set_stamina(double stamina)
+        {
+            bool ret = false;
+            if (stats_.size() > 0)
+            {
+                ret = true;
+                stats_.at(0).set_stamina(stamina);
+            }
+            return ret;
         }
     };
 

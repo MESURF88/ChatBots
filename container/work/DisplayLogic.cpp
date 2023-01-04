@@ -40,6 +40,7 @@ void StatSchemaProps::setHealthStat(double newHealthStat)
     if (qFuzzyCompare(m_healthStat, newHealthStat))
         return;
     m_healthStat = newHealthStat;
+    m_Profile.set_health(m_healthStat); // error check
     emit healthStatChanged();
 }
 
@@ -53,6 +54,7 @@ void StatSchemaProps::setManaStat(double newManaStat)
     if (qFuzzyCompare(m_manaStat, newManaStat))
         return;
     m_manaStat = newManaStat;
+    m_Profile.set_mana(m_manaStat); // error check
     emit manaStatChanged();
 }
 
@@ -66,6 +68,7 @@ void StatSchemaProps::setStaminaStat(double newStaminaStat)
     if (qFuzzyCompare(m_staminaStat, newStaminaStat))
         return;
     m_staminaStat = newStaminaStat;
+    m_Profile.set_stamina(m_staminaStat); // error check
     emit staminaStatChanged();
 }
 

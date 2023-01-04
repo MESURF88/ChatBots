@@ -36,6 +36,25 @@ Rectangle { // background
         color: "red"
         radius: parent.radius
     }
+    TextInput
+    {
+        anchors.left: healthBar.right
+        width: 80
+        height: 20
+        id: inputTextHealth
+        text: dspl.statInstance().healthStat
+        font.pixelSize: 20
+
+        Keys.onPressed: (event)=>  {
+            switch(event.key)
+            {
+                case Qt.Key_Return:
+                case Qt.Key_Enter:
+                dspl.statInstance().healthStat = parseFloat(inputTextHealth.text);
+                break;
+            }
+        }
+    }
 }
 
 
@@ -61,6 +80,26 @@ Rectangle { // background
         color: "lightblue"
         radius: parent.radius
     }
+    TextInput
+    {
+        anchors.left: manaBar.right
+        width: 80
+        height: 20
+        id: inputTextMana
+        text: dspl.statInstance().manaStat
+        font.pixelSize: 20
+
+        Keys.onPressed: (event)=>  {
+            switch(event.key)
+            {
+                case Qt.Key_Return:
+                case Qt.Key_Enter:
+                dspl.statInstance().manaStat = parseFloat(inputTextMana.text);
+                break;
+            }
+        }
+    }
+
 }
 Rectangle { // background
     id: staminaBar
@@ -83,6 +122,25 @@ Rectangle { // background
         height: 0.8 * staminaBar.height
         color: "lightgreen"
         radius: parent.radius
+    }
+    TextInput
+    {
+        anchors.left: staminaBar.right
+        width: 80
+        height: 20
+        id: inputTextStamina
+        text: dspl.statInstance().staminaStat
+        font.pixelSize: 20
+
+        Keys.onPressed: (event)=>  {
+            switch(event.key)
+            {
+                case Qt.Key_Return:
+                case Qt.Key_Enter:
+                dspl.statInstance().staminaStat = parseFloat(inputTextStamina.text);
+                break;
+            }
+        }
     }
 }
 }
