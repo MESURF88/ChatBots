@@ -13,6 +13,15 @@ Column
 {
 height: parent.height
 width: parent.width
+spacing: 2
+Text
+{
+    width: 80
+    height: 20
+    id: inputTextHUUID
+    text: dspl.statInstance().uuid
+    font.pixelSize: 20
+}
 
 Rectangle { // background
     id: healthBar

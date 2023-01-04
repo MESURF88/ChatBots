@@ -119,6 +119,7 @@ class StatSchemaProps : public QObject
     Q_PROPERTY(double healthStat READ healthStat WRITE setHealthStat NOTIFY healthStatChanged)
     Q_PROPERTY(double manaStat READ manaStat WRITE setManaStat NOTIFY manaStatChanged)
     Q_PROPERTY(double staminaStat READ staminaStat WRITE setStaminaStat NOTIFY staminaStatChanged)
+    Q_PROPERTY(QString uuid READ uuid NOTIFY uuidChanged)
 public:
     explicit StatSchemaProps(QObject *parent = nullptr);
     chatbots::ProfileFlat& getJsonHandle() { return m_Profile; };
@@ -133,14 +134,17 @@ void setManaStat(double newManaStat);
 double staminaStat() const;
 void setStaminaStat(double newStaminaStat);
 
-signals:
+QString uuid() const;
 
+signals:
 
 void healthStatChanged();
 
 void manaStatChanged();
 
 void staminaStatChanged();
+
+void uuidChanged();
 
 public slots:
 
@@ -152,6 +156,7 @@ chatbots::ProfileFlat m_Profile;
 double m_healthStat;
 double m_manaStat;
 double m_staminaStat;
+QString m_uuid;
 };
 
 class DisplayLogic : public QObject

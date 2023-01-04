@@ -16,7 +16,8 @@ const std::string chatBotsTest = R"(
 }
 )";
 
-StatSchemaProps::StatSchemaProps(QObject *parent) : QObject(parent), m_healthStat(10), m_manaStat(10), m_staminaStat(10)
+StatSchemaProps::StatSchemaProps(QObject *parent) : QObject(parent),
+    m_healthStat(10), m_manaStat(10), m_staminaStat(10), m_uuid("")
 {
 
 }
@@ -25,9 +26,11 @@ void StatSchemaProps::initJson(chatbots::ProfileFlat profile)
 {
     m_Profile = profile;
     // error check
+    m_uuid = QString::fromStdString( m_Profile.get_uuid() );
     m_healthStat = m_Profile.get_stats().at(0).health();
     m_manaStat = m_Profile.get_stats().at(0).mana();
     m_staminaStat = m_Profile.get_stats().at(0).stamina();
+
 }
 
 double StatSchemaProps::healthStat() const
@@ -70,6 +73,11 @@ void StatSchemaProps::setStaminaStat(double newStaminaStat)
     m_staminaStat = newStaminaStat;
     m_Profile.set_stamina(m_staminaStat); // error check
     emit staminaStatChanged();
+}
+
+QString StatSchemaProps::uuid() const
+{
+      return m_uuid;
 }
 
 
