@@ -1,0 +1,32 @@
+version: "3.9"
+# NOTE: tested on Windows with Docker Desktop (Docker Engine v20+ and docker-compose v1.29.2, build 5becea4c)
+# 1.) Create network first
+# docker network create --subnet=172.15.1.0/24 qt-net
+# verify with:
+# docker network ls 
+#
+# 2.) Build docker images
+# docker-compose build
+# 3. ) Finally run the containers
+# first the server is built and run, then client is built and run automatically
+# docker-compose up
+# docker-compose down
+# review log folder in server_container directory after the containers exit
+#
+
+services:
+    servercon:
+        build: ./container
+        volumes:
+            - './container/work:/mnt'
+
+        working_dir: /mnt
+        container_name: servercon
+        image: qsocket/server:qservertag  
+        networks:
+            default:
+                ipv4_address: 172.15.1.20
+networks: 
+    default: 
+        external: 
+            name: qt-net
