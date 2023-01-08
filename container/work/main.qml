@@ -4,7 +4,7 @@ import QtQuick.Controls 2.12
 
 Window {
     width: 640
-    height: 480
+    height: 280
     visible: true
     title: qsTr("ChatBots")
     property double maximum: 10
@@ -20,6 +20,25 @@ Text
     height: 20
     id: inputTextHUUID
     text: dspl.statInstance().uuid
+    font.pixelSize: 20
+}
+
+Text {
+    id: winLoseStatus
+    width: 80
+    height: 20
+    font.pixelSize: 20
+    color: (dspl.winStatus === "WIN")? "Green" : "Black"
+    visible: (dspl.winStatus === "")? false : true
+    text: dspl.winStatus
+}
+
+Text
+{
+    width: 80
+    height: 20
+    id: inputTextTurn
+    text: (dspl.statInstance().turn === 0)? "INACTIVE": "TURN"
     font.pixelSize: 20
 }
 
@@ -151,6 +170,14 @@ Rectangle { // background
             }
         }
     }
+}
+Text
+{
+    width: 80
+    height: 20
+    id: inputTextAction
+    text: dspl.actionState
+    font.pixelSize: 20
 }
 }
 }

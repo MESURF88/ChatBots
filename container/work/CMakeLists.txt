@@ -27,18 +27,24 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BINARY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/target)
 message("${CMAKE_BINARY_DIR}")
 
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Quick REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Quick REQUIRED)
+find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Quick Network REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Quick Network REQUIRED)
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 
 set(PROJECT_INCLUDES
+    JsonSchema.hpp
+    TcpComm.hpp
+    TcpClientComm.hpp
+    TcpServerComm.hpp
     DisplayLogic.hpp
 )
 
 set(PROJECT_SOURCES
         main.cpp
-		DisplayLogic.cpp
+        TcpClientComm.cpp
+        TcpServerComm.cpp
+	DisplayLogic.cpp
         qml.qrc
 )
 
@@ -63,7 +69,7 @@ endif()
 target_compile_definitions(ChatBots
   PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
 target_link_libraries(ChatBots
-  PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick)
+  PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick Qt${QT_VERSION_MAJOR}::Network)
   
 target_include_directories(ChatBots PRIVATE
  "${CMAKE_CURRENT_SOURCE_DIR}/jsoncons/include"

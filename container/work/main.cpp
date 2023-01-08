@@ -9,14 +9,21 @@ int main(int argc, char *argv[])
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
-
+    bool a_bclient = false;
+    for (int i = 1; i < argc; ++i) {
+        if (!qstrcmp(argv[i], "--client"))
+        {
+            a_bclient = true;
+        }
+    }
     QGuiApplication app(argc, argv);
 
     QQmlApplicationEngine engine;
 
+
+
     StatSchemaProps props;
-    //std::shared_ptr<StatSchemaProps> propsPtr = std::make_shared<StatSchemaProps>(props);
-    DisplayLogic dspl(props);
+    DisplayLogic dspl(a_bclient, QString("127.0.0.1"), props);
     QQmlContext* context = engine.rootContext();
     context->setContextProperty("dspl", &dspl);
 
