@@ -259,7 +259,7 @@ void DisplayLogic::ProcessRead(QJsonObject obj)
     chatbots::ProfileFlat convSelfProfile = jsoncons::decode_json<chatbots::ProfileFlat>(convCandidate);
     m_StatSchemaProps.setStatsJsonFromFullProfile(convSelfProfile);
     // process slowly
-    QThread::msleep(300);
+    QThread::msleep(600);
 
     if (convSelfProfile.get_lose() == true)
     {

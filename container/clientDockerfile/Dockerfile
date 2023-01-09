@@ -22,8 +22,5 @@ RUN  apt-get update && \
      apt-get install -y '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev && \
      apt-get install -y x11-apps
 
-#TODO: remove
-ENV QT_DEBUG_PLUGINS=1
-
 # Define default command.
 CMD /bin/bash run_client.sh ${ipaddr}
