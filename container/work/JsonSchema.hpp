@@ -6,7 +6,6 @@
 
 #define PORT (6789)
 
-
 namespace chatbots {
     class StatSchema
     {
@@ -39,29 +38,25 @@ namespace chatbots {
     {
         std::string uuid_;
         bool inplay_;
-        bool turn_;
         bool lose_;
         std::vector<StatSchema> stats_;
     public:
         ProfileFlat()
-            : uuid_(""), inplay_(false), turn_(false), lose_(false), stats_()
+            : uuid_(""), inplay_(false), lose_(false), stats_()
         {
         }
 
         ProfileFlat(const std::string& UUID,
             const bool& inplay,
-            const bool& turn,
             const bool& lose,
             const std::vector<StatSchema>& statistics)
-            : uuid_(UUID), inplay_(inplay), turn_(turn), lose_(lose), stats_(statistics)
+            : uuid_(UUID), inplay_(inplay), lose_(lose), stats_(statistics)
         {
         }
 
         const std::string get_uuid() const { return uuid_; }
 
         const bool& get_inplay() const { return inplay_; }
-
-        const bool& get_turn() const { return turn_; }
 
         const bool& get_lose() const { return lose_; }
 
@@ -77,11 +72,6 @@ namespace chatbots {
         void set_inplay(const bool& inplay)
         {
             inplay_ = inplay;
-        }
-
-        void set_turn(const bool& turn)
-        {
-            turn_ = turn;
         }
 
         void set_lose(const bool& lose)
@@ -141,6 +131,6 @@ namespace chatbots {
 } // namespace chatbots
 // Declare the traits. Specify which data members need to be serialized.
 JSONCONS_ALL_CTOR_GETTER_TRAITS(chatbots::StatSchema, health, mana, stamina, armor)
-JSONCONS_ALL_GETTER_SETTER_TRAITS(chatbots::ProfileFlat, get_, set_, uuid, inplay, turn, lose, stats)
+JSONCONS_ALL_GETTER_SETTER_TRAITS(chatbots::ProfileFlat, get_, set_, uuid, inplay, lose, stats)
 
 #endif

@@ -3,7 +3,7 @@ import QtQuick.Window 2.12
 import QtQuick.Controls 2.12
 
 Window {
-    width: 500
+    width: 460
     height: 380
     visible: true
     title: qsTr("ChatBots")

@@ -10,7 +10,6 @@ const std::string chatBotsTest = R"(
 {
    "uuid": "f9c35e8e-f774-4b8f-b0e6-ad0c948c689a",
    "inplay" : false,
-   "turn": false,
    "lose": false,
    "stats": [
    {
@@ -24,7 +23,7 @@ const std::string chatBotsTest = R"(
 )";
 
 StatSchemaProps::StatSchemaProps(QObject *parent) : QObject(parent),
-    m_healthStat(10), m_manaStat(10), m_staminaStat(10), m_uuid(""), m_turn(false)
+    m_healthStat(10), m_manaStat(10), m_staminaStat(10), m_uuid("")
 {
 
 }
@@ -34,7 +33,6 @@ void StatSchemaProps::initJson(chatbots::ProfileFlat profile)
     m_Profile = profile;
     // error check
     m_uuid = QString::fromStdString( m_Profile.get_uuid() );
-    m_turn = m_Profile.get_turn();
     m_healthStat = m_Profile.get_stats().at(0).health();
     m_manaStat = m_Profile.get_stats().at(0).mana();
     m_staminaStat = m_Profile.get_stats().at(0).stamina();
@@ -127,30 +125,16 @@ QString StatSchemaProps::uuid() const
       return m_uuid;
 }
 
-bool StatSchemaProps::turn() const
-{
-    return m_turn;
-}
-
-void StatSchemaProps::setTurn(bool turn)
-{
-    m_turn = turn;
-    m_Profile.set_turn(turn);
-    emit turnChanged();
-}
-
 DisplayLogic::DisplayLogic(bool a_bclient, QString ipAddr, StatSchemaProps &props, QObject *parent): m_StatSchemaProps(props), m_winStatus(""), m_actionState("NONE")
 {
      chatbots::ProfileFlat initselfprofile = jsoncons::decode_json<chatbots::ProfileFlat>(chatBotsTest);
      if (a_bclient)
      {
-        initselfprofile.set_turn(true);
         superTcp = new TcpClientComm();
         qDebug() << "client";
      }
      else
      {
-        initselfprofile.set_turn(false);
         // make a random server uuid
         QUuid uuid = QUuid::createUuid();
         initselfprofile.set_uuid(uuid.toString().toStdString());
@@ -198,25 +182,7 @@ void DisplayLogic::performActionOnOpponent(ACTIONSTATE state, quint32 gain)
        }
        else
        {
-       m_StatSchemaProps.setStaminaStat(m_StatSchemaProps.staminaStat()-2);
-       double armorval = convOpponentProfile.get_stats().at(0).armor();
-       double healthval = convOpponentProfile.get_stats().at(0).health();
-       int diff = armorval - gain;
-       if (diff < 0)
-       {
-           if (armorval > 0)
-           {
-            convOpponentProfile.set_armor(0);
-            convOpponentProfile.set_health(healthval + diff);
-           }
-           else {
-               convOpponentProfile.set_health(healthval - gain);
-           }
-       }
-       else
-       {
-            convOpponentProfile.set_armor(armorval - gain);
-       }
+           normalAttack(gain);
        }
    }
    else if (state == ACTIONSTATE::ATTACKMAGIC)
@@ -229,31 +195,20 @@ void DisplayLogic::performActionOnOpponent(ACTIONSTATE state, quint32 gain)
        }
        else
        {
-       m_StatSchemaProps.setManaStat(m_StatSchemaProps.manaStat()-2);
-       double armorval = convOpponentProfile.get_stats().at(0).armor();
-       double healthval = convOpponentProfile.get_stats().at(0).health();
-       int diff = armorval - gain;
-       if (diff < 0)
-       {
-           if (armorval > 0)
-           {
-            convOpponentProfile.set_armor(0);
-            convOpponentProfile.set_health(healthval + diff);
-           }
-           else {
-               convOpponentProfile.set_health(healthval - gain);
-           }
-       }
-       else
-       {
-            convOpponentProfile.set_armor(armorval - gain);
-       }
+           magicAttack(gain);
        }
    }
    else if (state == ACTIONSTATE::RECOVER)
    {
-       m_StatSchemaProps.setStaminaStat(m_StatSchemaProps.staminaStat()+1);
-       m_StatSchemaProps.setManaStat(m_StatSchemaProps.manaStat()+1);
+       if ((m_StatSchemaProps.staminaStat() >= 8) && (m_StatSchemaProps.manaStat() >= 8))
+       {
+            // do a normal attack have stats for it
+            normalAttack(gain);
+       }
+       else {
+           m_StatSchemaProps.setStaminaStat(m_StatSchemaProps.staminaStat()+1);
+           m_StatSchemaProps.setManaStat(m_StatSchemaProps.manaStat()+1);
+       }
    }
    // if health of conOpProfile goes to zero set lose condition.
    if (convOpponentProfile.get_stats().at(0).health() <= 0)
@@ -264,13 +219,47 @@ void DisplayLogic::performActionOnOpponent(ACTIONSTATE state, quint32 gain)
    superTcp->sendJsonAll(convOpponentProfile);
 }
 
+void DisplayLogic::normalAttack(quint32 gain)
+{
+    m_StatSchemaProps.setStaminaStat(m_StatSchemaProps.staminaStat()-2);
+    attack(gain);
+}
+
+void DisplayLogic::magicAttack(quint32 gain)
+{
+    m_StatSchemaProps.setManaStat(m_StatSchemaProps.manaStat()-2);
+    attack(gain);
+}
+
+void DisplayLogic::attack(quint32 gain)
+{
+    double armorval = convOpponentProfile.get_stats().at(0).armor();
+    double healthval = convOpponentProfile.get_stats().at(0).health();
+    int diff = armorval - gain;
+    if (diff < 0)
+    {
+        if (armorval > 0)
+        {
+         convOpponentProfile.set_armor(0);
+         convOpponentProfile.set_health(healthval + diff);
+        }
+        else {
+            convOpponentProfile.set_health(healthval - gain);
+        }
+    }
+    else
+    {
+         convOpponentProfile.set_armor(armorval - gain);
+    }
+}
+
 void DisplayLogic::ProcessRead(QJsonObject obj)
 {
     std::string convCandidate = QJsonDocument(obj).toJson(QJsonDocument::Compact).toStdString();
     chatbots::ProfileFlat convSelfProfile = jsoncons::decode_json<chatbots::ProfileFlat>(convCandidate);
     m_StatSchemaProps.setStatsJsonFromFullProfile(convSelfProfile);
     // process slowly
-    QThread::msleep(500);
+    QThread::msleep(300);
 
     if (convSelfProfile.get_lose() == true)
     {
