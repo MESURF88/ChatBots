@@ -16,7 +16,8 @@ const std::string chatBotsTest = R"(
    {
        "health": 10.0,
        "mana" : 10.0,
-       "stamina": 10.0
+       "stamina": 10.0,
+       "armor": 10.0
      }
    ]
 }
@@ -33,20 +34,20 @@ void StatSchemaProps::initJson(chatbots::ProfileFlat profile)
     m_Profile = profile;
     // error check
     m_uuid = QString::fromStdString( m_Profile.get_uuid() );
+    m_turn = m_Profile.get_turn();
     m_healthStat = m_Profile.get_stats().at(0).health();
     m_manaStat = m_Profile.get_stats().at(0).mana();
     m_staminaStat = m_Profile.get_stats().at(0).stamina();
+    m_armorStat = m_Profile.get_stats().at(0).armor();
 }
 
 void StatSchemaProps::setStatsJsonFromFullProfile(chatbots::ProfileFlat profile)
 {
     m_Profile.set_stats(profile.get_stats());
     m_healthStat = m_Profile.get_stats().at(0).health();
-    m_manaStat = m_Profile.get_stats().at(0).mana();
-    m_staminaStat = m_Profile.get_stats().at(0).stamina();
+    m_armorStat = m_Profile.get_stats().at(0).armor();
     emit healthStatChanged();
-    emit manaStatChanged();
-    emit staminaStatChanged();
+    emit armorStatChanged();
 }
 
 double StatSchemaProps::healthStat() const
@@ -58,6 +59,10 @@ void StatSchemaProps::setHealthStat(double newHealthStat)
 {
     if (qFuzzyCompare(m_healthStat, newHealthStat))
         return;
+    if (newHealthStat > 10)
+        newHealthStat = 10;
+    if (newHealthStat < 0)
+        newHealthStat = 0;
     m_healthStat = newHealthStat;
     m_Profile.set_health(m_healthStat); // error check
     emit healthStatChanged();
@@ -72,6 +77,10 @@ void StatSchemaProps::setManaStat(double newManaStat)
 {
     if (qFuzzyCompare(m_manaStat, newManaStat))
         return;
+    if (newManaStat > 10)
+        newManaStat = 10;
+    if (newManaStat < 0)
+        newManaStat = 0;
     m_manaStat = newManaStat;
     m_Profile.set_mana(m_manaStat); // error check
     emit manaStatChanged();
@@ -86,9 +95,31 @@ void StatSchemaProps::setStaminaStat(double newStaminaStat)
 {
     if (qFuzzyCompare(m_staminaStat, newStaminaStat))
         return;
+    if (newStaminaStat > 10)
+        newStaminaStat = 10;
+    if (newStaminaStat < 0)
+        newStaminaStat = 0;
     m_staminaStat = newStaminaStat;
     m_Profile.set_stamina(m_staminaStat); // error check
     emit staminaStatChanged();
+}
+
+double StatSchemaProps::armorStat() const
+{
+    return m_armorStat;
+}
+
+void StatSchemaProps::setArmorStat(double newArmorStat)
+{
+    if (qFuzzyCompare(m_armorStat, newArmorStat))
+        return;
+    if (newArmorStat > 10)
+        newArmorStat = 10;
+    if (newArmorStat < 0)
+        newArmorStat = 0;
+    m_armorStat = newArmorStat;
+    m_Profile.set_armor(m_armorStat); // error check
+    emit armorStatChanged();
 }
 
 QString StatSchemaProps::uuid() const
@@ -103,8 +134,6 @@ bool StatSchemaProps::turn() const
 
 void StatSchemaProps::setTurn(bool turn)
 {
-    if (m_turn == turn)
-        return;
     m_turn = turn;
     m_Profile.set_turn(turn);
     emit turnChanged();
@@ -113,13 +142,11 @@ void StatSchemaProps::setTurn(bool turn)
 DisplayLogic::DisplayLogic(bool a_bclient, QString ipAddr, StatSchemaProps &props, QObject *parent): m_StatSchemaProps(props), m_winStatus(""), m_actionState("NONE")
 {
      chatbots::ProfileFlat initselfprofile = jsoncons::decode_json<chatbots::ProfileFlat>(chatBotsTest);
-     //TODO: jsoncons::encode_json_pretty(m_StatSchemaProps.getJsonHandle(), std::cout);
      if (a_bclient)
      {
         initselfprofile.set_turn(true);
         superTcp = new TcpClientComm();
         qDebug() << "client";
-        //client.StartClient(m_StatSchemaProps.getJsonHandle(), ipAddr, PORT, 10);
      }
      else
      {
@@ -129,15 +156,11 @@ DisplayLogic::DisplayLogic(bool a_bclient, QString ipAddr, StatSchemaProps &prop
         initselfprofile.set_uuid(uuid.toString().toStdString());
         superTcp = new TcpServerComm();
         qDebug() << "server";
-        //server = new MyTcpServer(this);
-        //connect(server,&MyTcpServer::newReadJson,this,&DisplayLogic::ProcessRead);
      }
      m_StatSchemaProps.initJson(initselfprofile);
      connect(superTcp,&TcpComm::newFullProfileJson,this,&DisplayLogic::ProcessFullProfileRead);
      connect(superTcp,&TcpComm::newStatJson,this,&DisplayLogic::ProcessRead);
-     connect(superTcp,&TcpComm::newAck,this,&DisplayLogic::ProcessAckRead);
      superTcp->StartRound(m_StatSchemaProps.getJsonHandle(), ipAddr, PORT);
-
 }
 
 void DisplayLogic::ProcessFullProfileRead(QJsonObject obj)
@@ -157,7 +180,7 @@ void DisplayLogic::ProcessFullProfileRead(QJsonObject obj)
         superTcp->setHasOpponentsProfile();
         convOpponentProfile.set_inplay(true);
         // Start Random Action Event on the opponent client starts after both profiles received
-        quint32 option = QRandomGenerator::global()->bounded( 1, 2 );
+        quint32 option = QRandomGenerator::global()->bounded( 1, 3 );
         quint32 gain = QRandomGenerator::global()->bounded( 1, 3 );
         performActionOnOpponent(static_cast<ACTIONSTATE>(option), gain);
     }
@@ -165,9 +188,80 @@ void DisplayLogic::ProcessFullProfileRead(QJsonObject obj)
 
 void DisplayLogic::performActionOnOpponent(ACTIONSTATE state, quint32 gain)
 {
-   convOpponentProfile.set_turn(true);
-   m_StatSchemaProps.setTurn(false);
-
+   if (state == ACTIONSTATE::ATTACKNORMAL)
+   {
+       if (m_StatSchemaProps.staminaStat() < 2)
+       {
+           // missed
+           setActionState("MISSED ATTACK");
+           m_StatSchemaProps.setManaStat(m_StatSchemaProps.manaStat()+1);
+       }
+       else
+       {
+       m_StatSchemaProps.setStaminaStat(m_StatSchemaProps.staminaStat()-2);
+       double armorval = convOpponentProfile.get_stats().at(0).armor();
+       double healthval = convOpponentProfile.get_stats().at(0).health();
+       int diff = armorval - gain;
+       if (diff < 0)
+       {
+           if (armorval > 0)
+           {
+            convOpponentProfile.set_armor(0);
+            convOpponentProfile.set_health(healthval + diff);
+           }
+           else {
+               convOpponentProfile.set_health(healthval - gain);
+           }
+       }
+       else
+       {
+            convOpponentProfile.set_armor(armorval - gain);
+       }
+       }
+   }
+   else if (state == ACTIONSTATE::ATTACKMAGIC)
+   {
+       if (m_StatSchemaProps.manaStat() < 2)
+       {
+           // missed
+           setActionState("MISSED MAGIC ATTACK");
+           m_StatSchemaProps.setStaminaStat(m_StatSchemaProps.staminaStat()+1);
+       }
+       else
+       {
+       m_StatSchemaProps.setManaStat(m_StatSchemaProps.manaStat()-2);
+       double armorval = convOpponentProfile.get_stats().at(0).armor();
+       double healthval = convOpponentProfile.get_stats().at(0).health();
+       int diff = armorval - gain;
+       if (diff < 0)
+       {
+           if (armorval > 0)
+           {
+            convOpponentProfile.set_armor(0);
+            convOpponentProfile.set_health(healthval + diff);
+           }
+           else {
+               convOpponentProfile.set_health(healthval - gain);
+           }
+       }
+       else
+       {
+            convOpponentProfile.set_armor(armorval - gain);
+       }
+       }
+   }
+   else if (state == ACTIONSTATE::RECOVER)
+   {
+       m_StatSchemaProps.setStaminaStat(m_StatSchemaProps.staminaStat()+1);
+       m_StatSchemaProps.setManaStat(m_StatSchemaProps.manaStat()+1);
+   }
+   // if health of conOpProfile goes to zero set lose condition.
+   if (convOpponentProfile.get_stats().at(0).health() <= 0)
+   {
+       convOpponentProfile.set_lose(true);
+       setWinStatus("WIN");
+   }
+   superTcp->sendJsonAll(convOpponentProfile);
 }
 
 void DisplayLogic::ProcessRead(QJsonObject obj)
@@ -175,8 +269,8 @@ void DisplayLogic::ProcessRead(QJsonObject obj)
     std::string convCandidate = QJsonDocument(obj).toJson(QJsonDocument::Compact).toStdString();
     chatbots::ProfileFlat convSelfProfile = jsoncons::decode_json<chatbots::ProfileFlat>(convCandidate);
     m_StatSchemaProps.setStatsJsonFromFullProfile(convSelfProfile);
-    // change at different times
-    QThread::msleep(300);
+    // process slowly
+    QThread::msleep(500);
 
     if (convSelfProfile.get_lose() == true)
     {
@@ -187,15 +281,8 @@ void DisplayLogic::ProcessRead(QJsonObject obj)
     {
 
         // else Random Event
-        quint32 option = QRandomGenerator::global()->bounded( 0, 3 );
+        quint32 option = QRandomGenerator::global()->bounded( 0, 4 );
         quint32 gain = QRandomGenerator::global()->bounded( 1, 3 );
-
-        // if health of conOpProfile goes to zero set lose condition.
-        if (convOpponentProfile.get_stats().at(0).health() <= 0)
-        {
-            convOpponentProfile.set_lose(true);
-            setWinStatus("WIN");
-        }
 
         switch (option)
         {
@@ -207,16 +294,14 @@ void DisplayLogic::ProcessRead(QJsonObject obj)
             break;
         default:
             setActionState(m_actionMap.value(ACTIONSTATE::NONE));
+            // recover some points
+            m_StatSchemaProps.setManaStat(m_StatSchemaProps.manaStat()+2);
+            m_StatSchemaProps.setStaminaStat(m_StatSchemaProps.staminaStat()+2);
+            superTcp->sendJsonAll(convOpponentProfile);
             break;
         }
     }
 }
-
-void DisplayLogic::ProcessAckRead()
-{
-    qDebug() << "Ack Received!";
-}
-
 
 const QString &DisplayLogic::winStatus() const
 {
@@ -243,4 +328,5 @@ void DisplayLogic::setActionState(const QString &newActionState)
     m_actionState = newActionState;
     emit actionStateChanged();
 }
+
 

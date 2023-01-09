@@ -11,6 +11,7 @@ class StatSchemaProps : public QObject
     Q_PROPERTY(double healthStat READ healthStat WRITE setHealthStat NOTIFY healthStatChanged)
     Q_PROPERTY(double manaStat READ manaStat WRITE setManaStat NOTIFY manaStatChanged)
     Q_PROPERTY(double staminaStat READ staminaStat WRITE setStaminaStat NOTIFY staminaStatChanged)
+    Q_PROPERTY(double armorStat READ armorStat WRITE setArmorStat NOTIFY armorStatChanged)
     Q_PROPERTY(QString uuid READ uuid NOTIFY uuidChanged)
     Q_PROPERTY(bool turn READ turn WRITE setTurn NOTIFY turnChanged)
 public:
@@ -27,6 +28,9 @@ void setManaStat(double newManaStat);
 
 double staminaStat() const;
 void setStaminaStat(double newStaminaStat);
+
+double armorStat() const;
+void setArmorStat(double newArmorStat);
 
 QString uuid() const;
 
@@ -45,6 +49,8 @@ void uuidChanged();
 
 void turnChanged();
 
+void armorStatChanged();
+
 public slots:
 
 protected:
@@ -55,6 +61,7 @@ chatbots::ProfileFlat m_Profile;
 double m_healthStat;
 double m_manaStat;
 double m_staminaStat;
+double m_armorStat;
 QString m_uuid;
 bool m_turn;
 };
@@ -92,7 +99,6 @@ signals:
 public slots:
 
     void ProcessRead(QJsonObject obj);
-    void ProcessAckRead();
     void ProcessFullProfileRead(QJsonObject obj);
 protected:
 

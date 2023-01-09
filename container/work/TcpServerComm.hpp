@@ -12,22 +12,21 @@ class TcpServerComm : public TcpComm
     explicit TcpServerComm(QObject *parent=0): TcpComm(parent)
     {
         connect(this, &QTcpServer::newConnection, this, &TcpServerComm::newConnection);
-        //TODO: connect(this, SIGNAL(newConnection()), this, SLOT(newConnection()));
         bool succ = listen(QHostAddress::Any, PORT);
         if (!succ)
         {
           qDebug()<<"Server couldn't start!";
+          qDebug() << "Error: " << errorString();
         }
         else
         {
           qDebug()<<"Server started on port: "<< PORT;
-          qDebug() << errorString();
         }
     }
     virtual TCPID getID() override;
     //Start the server
     virtual void StartRound(chatbots::ProfileFlat m_initselfprofile, QString ipaddr, int port) override;
-    virtual void sendAck() override; //send
+    //send
     virtual void sendJsonAll(chatbots::ProfileFlat m_opponentprofile) override;
   signals:
 

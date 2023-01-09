@@ -23,7 +23,6 @@ class TcpComm: public QTcpServer
         };
         //Start the messaging
         virtual void StartRound(chatbots::ProfileFlat m_initselfprofile, QString ipaddr, int port) = 0;
-        virtual void sendAck() = 0; //send
         virtual void sendJsonAll(chatbots::ProfileFlat m_opponentprofile) = 0;
         virtual TCPID getID() = 0;
         void setHasOpponentsProfile() { m_hasProfile = true; };

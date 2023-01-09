@@ -3,14 +3,17 @@ import QtQuick.Window 2.12
 import QtQuick.Controls 2.12
 
 Window {
-    width: 640
-    height: 280
+    width: 500
+    height: 380
     visible: true
     title: qsTr("ChatBots")
     property double maximum: 10
     property double minimum: 0
+
+
 Column
 {
+    id: playView
 height: parent.height
 width: parent.width
 spacing: 2
@@ -23,6 +26,72 @@ Text
     font.pixelSize: 20
 }
 
+Image
+{
+    width: 80
+    height: 80
+    id: theSpriteAction
+    source: "idle.png"
+    states: [
+        State {
+            name: "Idle"
+            PropertyChanges {
+                target: theSpriteAction
+                source: "idle.png"
+            }
+        },
+        State {
+            name: "Missed Attack"
+            PropertyChanges {
+                target: theSpriteAction
+                source: "missed.png"
+            }
+        },
+        State {
+            name: "Missed Magic Attack"
+            PropertyChanges {
+                target: theSpriteAction
+                source: "missedmagic.png"
+            }
+        },
+        State {
+            name: "Attack"
+            PropertyChanges {
+                target: theSpriteAction
+                source: "attack.png"
+            }
+        },
+        State {
+            name: "Magic Attack"
+            PropertyChanges {
+                target: theSpriteAction
+                source: "magicattack.png"
+            }
+        },
+        State {
+            name: "Recover"
+            PropertyChanges {
+                target: theSpriteAction
+                source: "recover.png"
+            }
+        },
+        State {
+            name: "Win"
+            PropertyChanges {
+                target: theSpriteAction
+                source: "win.png"
+            }
+        },
+        State {
+            name: "Lose"
+            PropertyChanges {
+                target: theSpriteAction
+                source: "lose.png"
+            }
+        }
+    ]
+}
+
 Text {
     id: winLoseStatus
     width: 80
@@ -31,15 +100,12 @@ Text {
     color: (dspl.winStatus === "WIN")? "Green" : "Black"
     visible: (dspl.winStatus === "")? false : true
     text: dspl.winStatus
-}
-
-Text
-{
-    width: 80
-    height: 20
-    id: inputTextTurn
-    text: (dspl.statInstance().turn === 0)? "INACTIVE": "TURN"
-    font.pixelSize: 20
+    onVisibleChanged: {
+        if (theSpriteAction.state !== "Idle")
+        {
+            theSpriteAction.state = (dspl.winStatus === "WIN")? "Win" : "Lose";
+        }
+    }
 }
 
 Rectangle { // background
@@ -171,6 +237,55 @@ Rectangle { // background
         }
     }
 }
+Rectangle { // background
+    id: amorBar
+
+// public
+    property double value:   dspl.statInstance().armorStat
+
+// private
+    width: 400;  height: 50 // default size
+
+    border.width: 0.05 * amorBar.height
+    radius: 0.5 * height
+
+    Rectangle { // foreground
+        visible: amorBar.value > minimum
+        x: 0.1 * amorBar.height;  y: 0.1 * amorBar.height
+        width: Math.max(height,
+               Math.min((amorBar.value - minimum) / (maximum - minimum) * (parent.width - 0.2 * amorBar.height),
+                        parent.width - 0.2 * amorBar.height)) // clip
+        height: 0.8 * amorBar.height
+        color: "darkgrey"
+        radius: parent.radius
+    }
+    TextInput
+    {
+        anchors.left: amorBar.right
+        width: 80
+        height: 20
+        id: inputTextArmor
+        text: dspl.statInstance().armorStat
+        font.pixelSize: 20
+
+        Keys.onPressed: (event)=>  {
+            switch(event.key)
+            {
+                case Qt.Key_Return:
+                case Qt.Key_Enter:
+                dspl.statInstance().armorStat = parseFloat(inputTextArmor.text);
+                break;
+            }
+        }
+    }
+}
+Rectangle
+{
+    id: borderRect
+    height: inputTextAction.height+5
+    width: 400
+    border.color: "Black"
+    border.width: 2
 Text
 {
     width: 80
@@ -178,6 +293,30 @@ Text
     id: inputTextAction
     text: dspl.actionState
     font.pixelSize: 20
+    onTextChanged: {
+        switch(dspl.actionState)
+        {
+        case "MISSED ATTACK":
+            theSpriteAction.state = "Missed Attack"
+            break;
+        case "MISSED MAGIC ATTACK":
+            theSpriteAction.state = "Missed Magic Attack"
+            break;
+        case "NORMAL ATTACK":
+            theSpriteAction.state = "Attack"
+            break;
+        case "MAGIC ATTACK":
+            theSpriteAction.state = "Magic Attack"
+            break;
+        case "RECOVER":
+            theSpriteAction.state = "Recover"
+            break;
+        default:
+            theSpriteAction.state = "Idle"
+            break;
+        }
+    }
+}
 }
 }
 }

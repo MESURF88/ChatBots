@@ -13,21 +13,25 @@ namespace chatbots {
         double health_;
         double mana_;
         double stamina_;
+        double armor_;
     public:
         StatSchema(double health,
             double mana,
-            double stamina)
-            : health_(health), mana_(mana), stamina_(stamina)
+            double stamina,
+            double armor)
+            : health_(health), mana_(mana), stamina_(stamina), armor_(armor)
         {
 
         }
         double health() const { return health_; }
         double mana() const { return mana_; }
         double stamina() const { return stamina_; }
+        double armor() const { return armor_; }
 
         void set_health(double health) { health_ = health; }
         void set_mana(double mana) { mana_ = mana; }
         void set_stamina(double stamina) { stamina_ = stamina; }
+        void set_armor(double armor) { armor_ = armor; }
     };
 
     // #4 Class with getters and setters
@@ -120,12 +124,23 @@ namespace chatbots {
             }
             return ret;
         }
+
+        bool set_armor(double armor)
+        {
+            bool ret = false;
+            if (stats_.size() > 0)
+            {
+                ret = true;
+                stats_.at(0).set_armor(armor);
+            }
+            return ret;
+        }
     };
 
 
 } // namespace chatbots
 // Declare the traits. Specify which data members need to be serialized.
-JSONCONS_ALL_CTOR_GETTER_TRAITS(chatbots::StatSchema, health, mana, stamina)
+JSONCONS_ALL_CTOR_GETTER_TRAITS(chatbots::StatSchema, health, mana, stamina, armor)
 JSONCONS_ALL_GETTER_SETTER_TRAITS(chatbots::ProfileFlat, get_, set_, uuid, inplay, turn, lose, stats)
 
 #endif

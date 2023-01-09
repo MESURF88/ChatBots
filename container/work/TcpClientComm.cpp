@@ -24,15 +24,6 @@ void TcpClientComm::StartRound(chatbots::ProfileFlat m_initselfprofile, QString 
     }
 }
 
-void TcpClientComm::sendAck()
-{
-    if (csocket != nullptr)
-    {
-        csocket->write(ACK.toUtf8());
-        csocket->waitForBytesWritten(1000);
-    }
-}
-
 void TcpClientComm::sendJsonAll(chatbots::ProfileFlat m_opponentprofile)
 {
     if (csocket != nullptr)
@@ -48,12 +39,9 @@ void TcpClientComm::sendJsonAll(chatbots::ProfileFlat m_opponentprofile)
 void TcpClientComm::readyRead()
 {
     QString line = csocket->readAll();
-    //TODO:
-    qDebug() << line;
 
         QJsonDocument jsonDoc = QJsonDocument::fromJson(line.toUtf8());
         QJsonObject jsonObject = jsonDoc.object();
-        qDebug() << "Received JSON:" << jsonObject;
         if (m_hasProfile)
         {
             emit TcpComm::newStatJson(jsonObject);

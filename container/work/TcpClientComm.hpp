@@ -16,7 +16,7 @@ class TcpClientComm : public TcpComm
     virtual TCPID getID() override;
     //Start the client
     virtual void StartRound(chatbots::ProfileFlat m_initselfprofile, QString ipaddr, int port) override;
-    virtual void sendAck() override; //send
+    //send
     virtual void sendJsonAll(chatbots::ProfileFlat m_opponentprofile) override;
   signals:
 

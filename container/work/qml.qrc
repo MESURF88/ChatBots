@@ -1,5 +1,13 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
+        <file>idle.png</file>
+        <file>missed.png</file>
+        <file>attack.png</file>
+        <file>lose.png</file>
+        <file>magicattack.png</file>
+        <file>missedmagic.png</file>
+        <file>recover.png</file>
+        <file>win.png</file>
     </qresource>
 </RCC>
