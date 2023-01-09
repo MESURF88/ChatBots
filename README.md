@@ -32,4 +32,4 @@ startsim.bat
 ```powershell
 shutdownsim.bat
 ```
-## Review log folder in server_container directory after the containers exit
+## Have fun!
