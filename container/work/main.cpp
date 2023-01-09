@@ -9,13 +9,30 @@ int main(int argc, char *argv[])
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
+    QString ipaddr = "";
     bool a_bclient = false;
     for (int i = 1; i < argc; ++i) {
         if (!qstrcmp(argv[i], "--client"))
         {
             a_bclient = true;
         }
+
     }
+	
+	if (a_bclient)
+	{
+	   // read in arguments ipaddr
+	  if (argc == 3u)
+	  {
+		ipaddr = argv[2u];
+	  }
+	  else
+	  {
+		qDebug() << "invalid arguments:";
+		return 1u;
+	  }
+	}
+	
     QGuiApplication app(argc, argv);
 
     QQmlApplicationEngine engine;
@@ -23,7 +40,7 @@ int main(int argc, char *argv[])
 
 
     StatSchemaProps props;
-    DisplayLogic dspl(a_bclient, QString("127.0.0.1"), props);
+    DisplayLogic dspl(a_bclient, (a_bclient) ? ipaddr : QString("127.0.0.1"), props);
     QQmlContext* context = engine.rootContext();
     context->setContextProperty("dspl", &dspl);
 

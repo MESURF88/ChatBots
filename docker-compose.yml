@@ -16,16 +16,36 @@ version: "3.9"
 
 services:
     servercon:
-        build: ./container
+        build: ./container/serverDockerfile
         volumes:
             - './container/work:/mnt'
 
         working_dir: /mnt
         container_name: servercon
         image: qsocket/server:qservertag  
+        env_file:
+            - qml-variables.env
         networks:
             default:
                 ipv4_address: 172.15.1.20
+    clientcon:
+        build: ./container/clientDockerfile
+        volumes:
+            - './container/work_client:/mnt'
+
+        working_dir: /mnt
+        container_name: clientcon
+        # arguments to pass to client
+        environment:
+            - ipaddr=172.15.1.20
+        image: qsocket/client:qclienttag
+        env_file:
+            - qml-variables.env
+        networks:
+            default:
+                ipv4_address: 172.15.1.10 
+        depends_on:
+            - servercon
 networks: 
     default: 
         external: 

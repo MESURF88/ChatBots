@@ -1,4 +1,5 @@
 .git
 libtest
+container/work_client
 container/work/build
 container/work/target/bin
